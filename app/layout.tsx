@@ -1,0 +1,18 @@
+import type { ReactNode } from 'react';
+import './globals.css';
+
+export const metadata = {
+	title: 'Performance Dashboard',
+	description: 'High-performance real-time dashboard'
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+	return (
+		<html lang="en">
+			<body>{children}</body>
+		</html>
+	);
+}
+
+
+
