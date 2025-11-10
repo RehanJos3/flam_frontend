@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataPoint, TimeRangeKey } from '../lib/types';
 import { generatePoint } from '../lib/dataGenerator';
 
@@ -10,7 +10,7 @@ const RANGE_TO_MS: Record<TimeRangeKey, number> = {
 
 export function useDataStream(initial: DataPoint[], timeRange: TimeRangeKey) {
 	const [data, setData] = useState<DataPoint[]>(initial);
-	const [isPending, startTransition] = useTransition();
+	// Keep updates simple in prod to avoid concurrent rendering pitfalls
 	const prevRef = useRef<DataPoint | undefined>(initial.at(-1));
 	const intervalRef = useRef<number | null>(null);
 	const stepMs = 100;
@@ -22,15 +22,13 @@ export function useDataStream(initial: DataPoint[], timeRange: TimeRangeKey) {
 		const t = (last?.timestamp ?? Date.now()) + stepMs;
 		const next = generatePoint(last, t);
 		prevRef.current = next;
-		startTransition(() => {
-			setData(prev => {
-				const nextArr = [...prev, next];
-				// sliding window by time range
-				const cutoff = t - windowMs;
-				let idx = 0;
-				while (idx < nextArr.length && nextArr[idx].timestamp < cutoff) idx++;
-				return idx > 0 ? nextArr.slice(idx) : nextArr;
-			});
+		setData(prev => {
+			const nextArr = [...prev, next];
+			// sliding window by time range
+			const cutoff = t - windowMs;
+			let idx = 0;
+			while (idx < nextArr.length && nextArr[idx].timestamp < cutoff) idx++;
+			return idx > 0 ? nextArr.slice(idx) : nextArr;
 		});
 	}, [stepMs, windowMs]);
 
@@ -55,7 +53,7 @@ export function useDataStream(initial: DataPoint[], timeRange: TimeRangeKey) {
 		};
 	}, [tick]);
 
-	return { data, isPending };
+	return { data, isPending: false };
 }
 
 
