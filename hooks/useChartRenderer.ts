@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { setupCanvas, clearCanvas, drawGrid } from '../lib/canvasUtils';
 
 export function useChartRenderer(
-	canvasRef: React.RefObject<HTMLCanvasElement>,
+	canvasRef: React.RefObject<HTMLCanvasElement | null>,
 	render: (ctx: CanvasRenderingContext2D, width: number, height: number) => void
 ) {
 	const rafRef = useRef<number | null>(null);
